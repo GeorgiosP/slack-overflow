@@ -3,7 +3,7 @@ exports.handler = (event, context, callback) => {
   let qs = require('querystring')
 
   //by default its set to null
-  let { text = null } = qs.parse(event.body)
+  let { text } = qs.parse(event.body.trim())
 
   let params = qs.stringify({
     site: 'stackoverflow.com',
@@ -22,21 +22,24 @@ exports.handler = (event, context, callback) => {
     })
 
   // if the text value is null just send a response skip the api call.
-  text === null
-    ? respond({
-        response_type: 'in_channel',
-        text: `Woops! looks like you forgot your question? try again.`,
-      })
-    : axios
-        .get(`https://api.stackexchange.com/search/advanced?${params}`)
-        .then(({ data }) => {
-          respond({
-            response_type: 'in_channel',
-            text: `Perhaps one of these links can help!
+  if (!text) {
+    respond({
+      response_type: 'in_channel',
+      text:
+        'Woops! Looks like you forgot your question! Correct format: `/ask <question_here>`',
+    })
+  } else {
+    axios
+      .get(`https://api.stackexchange.com/search/advanced?${params}`)
+      .then(({ data }) => {
+        respond({
+          response_type: 'in_channel',
+          text: `Perhaps one of these links can help!
 ${data.items
-              .map(q => `<${q.link}|${q.title}> *Score: ${q.score}*`)
-              .join('\n')}`,
-          })
+            .map(q => `<${q.link}|${q.title}> *Score: ${q.score}*`)
+            .join('\n')}`,
         })
-        .catch(error => respond({ text: error.message }))
+      })
+      .catch(error => respond({ text: error.message }))
+  }
 }
