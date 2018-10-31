@@ -2,7 +2,7 @@ exports.handler = (event, context, callback) => {
   let axios = require('axios')
   let qs = require('querystring')
 
-  //by default its set to null
+  //trim off white space from the body
   let { text } = qs.parse(event.body.trim())
 
   let params = qs.stringify({
