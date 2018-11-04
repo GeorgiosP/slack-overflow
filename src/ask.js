@@ -3,7 +3,7 @@ exports.handler = (event, context, callback) => {
   let qs = require('querystring')
 
   //trim off white space from the body
-  let { text } = qs.parse(event.body.trim())
+  let { text } = qs.parse(event.body)
 
   let params = qs.stringify({
     site: 'stackoverflow.com',
@@ -36,9 +36,8 @@ exports.handler = (event, context, callback) => {
           response_type: 'in_channel',
           text: `Perhaps one of these links can help!
 ${data.items
-            .map(q => `<${q.link}|${q.title}> *Score: ${q.score}*`)
-            .join('\n')}`,
-        })
+          .map(q => `⬆️ *${q.score.toLocaleString()}* - <${q.link}|${q.title}>`)
+          .join('\n')}`,
       })
       .catch(error => respond({ text: error.message }))
   }
